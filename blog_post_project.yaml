@@ -1,0 +1,649 @@
+openapi: 3.0.0
+info:
+  title: My Blog API
+  description: |
+    This is a simple api that will contain blog posts.
+    Users can Create, Read, Update and Delete psost.
+    They can also like and comment on other posts.
+  version: '0.1'
+
+
+servers:
+  - url: http://localhost/api/v1
+    description: For now it will run on the localhost
+
+
+tags:
+  - name: auth
+    description: Operations regarding user registration, login and logout
+  - name: users
+    description: Operations regarding user information
+  - name: posts
+    description: Operations using post manipulation
+
+
+paths:
+  /auth/register:
+    post:
+      tags: 
+        - auth
+      summary: Registers a user to the API
+      description: Include email, password and username to get registered
+      requestBody:
+        description: Provide email, password and username
+        content:
+          application/json:
+            schema:
+             $ref: '#/components/schemas/Registration'
+      responses: 
+        '200':
+          description: Registration Successful!
+          content: 
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RegResponse'
+        '401':
+          description: Authorization information is missing or invalid.
+          
+  /auth/login:
+    post:
+      tags:
+        - auth
+      summary: Logs in a user
+      description: Include valid email and password to get logged in
+      requestBody:
+        description: Provide email and password
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Creds'
+      responses:
+        '200':
+          description: Login Successful!
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Token'
+        '401':
+          description: Authorization information is missing or invalid.
+          
+  /auth/logout:
+    post:
+      tags:
+        - auth
+      summary: Logs out a user
+      description: Destroys the bearer token given to the user
+      responses:
+        '200':
+          description: Logout Successful!
+          content: 
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Successfully logged out!
+                    
+  /users/{userId}:
+    get:
+      security:
+        - {}
+        - bearerAuth: []
+      tags:
+        - users
+      summary: Retrieves a user's profile by their id.
+      description:  Retrieves info of the user with the specific id with or without authentication
+      parameters:
+        - $ref: '#/components/parameters/UserId'
+      responses:
+        '200':
+          description: Successfully retrieved user information
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/UserResponseLong'
+                  - $ref: '#/components/schemas/UserResponseShort'
+        '404':
+          description: User not found
+          
+    put:
+      security:
+        - bearerAuth: []
+      tags:
+        - users
+      summary: Updates user profile
+      description: Updates one or more fields of the user profile
+      parameters:
+        - $ref: '#/components/parameters/UserId'
+      requestBody:
+        description: Provide the fields you want to update
+        content:
+          application/json:
+            schema:
+             $ref: '#/components/schemas/UserBody'
+      responses:
+        '200':
+          description: Successfully updated user information
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/UserResponseLong'
+        '400':
+          description: Bad request
+        '401':
+          description: Authorization information is missing or invalid
+                  
+    delete:
+      security:
+        - bearerAuth: []
+      tags:
+        - users
+      summary: Deletes user profile
+      description: Deletes the user and logs the user out of the system
+      parameters:
+        - $ref: '#/components/parameters/UserId'
+      responses:
+        '200':
+          description: Deleted user successfully!
+          content: 
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Deleted user successfully!
+        '400':
+          description: Bad request
+        '401':
+          description: Authorization information is missing or invalid.
+                    
+  /posts:
+    post:
+      security:
+        - bearerAuth: []
+      tags:
+        - posts
+      summary: Creates a new post
+      description: Creates a new post including title, content, tags (optional), image_url (optional).
+
+      requestBody:
+        description: Provide title, content, tag (optional) and image url (optional) of the post
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PostBody'
+      responses:
+        '201':
+          description: Post created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PostBodyCreatedResponse'
+        '400':
+          description: Bad request
+        '401':
+          description: Authorization information is missing or invalid.
+          
+    get:
+      security:
+        - bearerAuth: []
+      tags:
+        - posts
+      summary: Get all the posts
+      description: Returns an array of posts
+      responses:
+        '200':
+          description: Array of posts
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PostBodyResponse'
+        '400':
+          description: Bad request
+        '401':
+          description: Authorization information is missing or invalid.
+          
+  /posts/{postId}:
+    get:
+      security:
+        - bearerAuth: []
+      tags:
+        - posts
+      summary: Get a specific post
+      description: Returns a post that matches with the provioded postID
+      parameters:
+        - $ref: '#/components/parameters/PostId'
+      responses:
+        '200':
+          description: A single post
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PostBodyCreatedResponse'
+        '400':
+          description: Bad request
+        '401':
+          description: Authorization information is missing or invalid.
+          
+    put:
+      security:
+        - bearerAuth: []
+      tags:
+        - posts
+      summary: Update a specific post
+      description: Updates a post that matches with the provioded postID
+      parameters:
+        - $ref: '#/components/parameters/PostId'
+      requestBody:
+        description: Provide the fields you want to update
+        content:
+          application/json:
+            schema:
+             $ref: '#/components/schemas/PostBody'
+      responses:
+        '200':
+          description: Updated the post
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PostBodyCreatedResponse'
+        '400':
+          description: Bad request
+        '401':
+          description: Authorization information is missing or invalid.
+          
+    delete:
+      security:
+        - bearerAuth: []
+      tags:
+        - posts
+      summary: Delete a specific post
+      description: Deletes a post that matches with the provioded postID
+      parameters:
+        - $ref: '#/components/parameters/PostId'
+      responses:
+        '200':
+          description: Deleted post successfully!
+          content: 
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Deleted post successfully!
+        '400':
+          description: Bad request
+        '401':
+          description: Authorization information is missing or invalid
+          
+  /posts/{postId}/comments:
+    post:
+      security:
+        - bearerAuth: []
+      tags:
+        - posts
+      summary: Comment on a specific post
+      description: Adds a comment to a post with a sepcific post id
+      parameters:
+        - $ref: '#/components/parameters/PostId'
+      requestBody:
+        description: Provide the comment
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                comment:
+                  type: string
+      responses:
+        '200':
+          description: Comment added successfully to the post
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommentResponse'
+        '400':
+          description: Bad request
+        '401':
+          description: Authorization information is missing or invalid.
+          
+  /posts/{postId}/comments/{commentId}:
+    put:
+      security:
+        - bearerAuth: []
+      tags:
+        - posts
+      summary: Update a comment
+      description: Updates a comment to a post with a sepcific post id and comment id
+      parameters:
+        - $ref: '#/components/parameters/PostId'
+        - $ref: '#/components/parameters/CommentId'
+      requestBody:
+        description: Update the comment
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                comment:
+                  type: string
+      responses:
+        '200':
+          description: Comment updated successfully to the post
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CommentResponse'
+        '400':
+          description: Bad request
+        '401':
+          description: Authorization information is missing or invalid.
+  
+    delete:
+      security:
+        - bearerAuth: []
+      tags:
+        - posts
+      summary: Delete a comment
+      description: Updates a comment to a post with a sepcific post id and comment id
+      parameters:
+        - $ref: '#/components/parameters/PostId'
+        - $ref: '#/components/parameters/CommentId'
+      responses:
+        '200':
+          description: Deleted comment successfully!
+          content: 
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Deleted comment successfully!
+        '400':
+          description: Bad request
+        '401':
+          description: Authorization information is missing or invalid
+          
+  /posts/{postId}/likes:
+    post:
+      security:
+        - bearerAuth: []
+      tags:
+        - posts
+      summary: Like a specific post
+      description: Adds a like to a post with a sepcific post id
+      parameters:
+        - $ref: '#/components/parameters/PostId'
+      responses:
+        '200':
+          description: Liked the post
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LikeResponse'
+        '400':
+          description: Bad request
+        '401':
+          description: Authorization information is missing or invalid.
+    
+    delete:
+      security:
+        - bearerAuth: []
+      tags:
+        - posts
+      summary: Remove like from a specific post
+      description: Removes a like to a post with a sepcific post id
+      parameters:
+        - $ref: '#/components/parameters/PostId'
+      responses:
+        '200':
+          description: Removed the like
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LikeResponse'
+        '400':
+          description: Bad request
+        '401':
+          description: Authorization information is missing or invalid.
+          
+    get:
+      security:
+        - bearerAuth: []
+      tags:
+        - posts
+      summary: Get info on who liked the specific post
+      description: Removes a like to a post with a sepcific post id
+      parameters:
+        - $ref: '#/components/parameters/PostId'
+      responses:
+        '200':
+          description: List of users
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/LikeGetResponse'
+        '400':
+          description: Bad request
+        '401':
+          description: Authorization information is missing or invalid.
+          
+    
+        
+      
+components:
+  schemas:
+    Creds:
+      type: object
+      required:
+          - email
+          - password
+      properties:
+        email:
+          type: string
+        password:
+          type: string
+          
+    Registration:
+      allOf:
+        - $ref: '#/components/schemas/Creds'
+        - type: object
+          properties:
+            username:
+              type: string
+              description: Username has to be unique
+          required:
+            - username
+          
+    Token:
+      type: object
+      properties:
+        token:
+          type: string
+    
+    RegResponse:
+      allOf:
+        - $ref: '#/components/schemas/Token'
+        - type: object
+          properties:
+            userid:
+              type: integer
+              format: int64
+    
+    UserBody:
+      type: object
+      properties:
+        username:
+          type: string
+        email:
+          type: string
+        bio:
+          type: string
+        image_url:
+          type: string
+    
+    UserResponseLong:
+      type: object
+      properties:
+        userid:
+          type: integer
+          format: int64
+        username:
+          type: string
+        email:
+          type: string
+        bio:
+          type: string
+        image_url:
+          type: string
+        created_at:
+          type: string
+        updated_at:
+          type: string
+          
+    UserResponseShort:
+      type: object
+      properties:
+        userid:
+          type: integer
+          format: int64
+        username:
+          type: string
+        bio:
+          type: string
+          
+    PostBody:
+      type: object
+      properties:
+        title:
+          type: string
+        content:
+          type: string
+        tags:
+          type: string
+        image_url:
+          type: string
+      required:
+            - title
+            - content
+            
+    PostBodyResponse:
+      type: object
+      properties:
+        postid:
+          type: integer
+          format: int64
+        title:
+          type: string
+        content:
+          type: string
+        tags:
+          type: string
+        image_url:
+          type: string
+            
+    PostBodyCreatedResponse:
+      type: object
+      properties:
+        postid:
+          type: integer
+          format: int64
+        title:
+          type: string
+        content:
+          type: string
+        tags:
+          type: string
+        image_url:
+          type: string
+        user:
+          type: string
+        userid:
+          type: integer
+          format: int64
+        likes:
+          type: integer
+          format: int64
+        comments:
+          type: integer
+          format: int64
+        created_at:
+          type: string
+        updated_at:
+          type: string
+          
+    CommentResponse:
+      type: object
+      properties:
+        commentId:
+          type: integer
+          format: int64
+        postId:
+          type: integer
+          format: int64
+        comment:
+          type: string
+          
+    LikeResponse:
+      type: object
+      properties:
+        postId:
+          type: integer
+          format: int64
+        likes:
+          type: integer
+          format: int64
+      
+    LikeGetResponse:
+      type: object
+      properties:
+        userid:
+          type: integer
+          format: int64
+        username:
+          type: string
+
+  
+  parameters:
+    UserId:
+      name: userId
+      in: path
+      schema:
+        type: integer
+        format: int64
+      required: true
+      description: Id of the user to get
+    
+    PostId:
+      name: postId
+      in: path
+      schema:
+        type: integer
+        format: int64
+      required: true
+      description: Id of the post to get
+    
+    CommentId:
+      name: commentId
+      in: path
+      schema:
+        type: integer
+        format: int64
+      required: true
+      description: Id of the comment to get
+          
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
