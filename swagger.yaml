@@ -487,8 +487,6 @@ components:
           type: string
         email:
           type: string
-        image_url:
-          type: string
     
     UserResponseLong:
       type: object
