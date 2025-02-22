@@ -498,8 +498,6 @@ components:
           type: string
         email:
           type: string
-        bio:
-          type: string
         image_url:
           type: string
         created_at:
@@ -514,8 +512,6 @@ components:
           type: integer
           format: int64
         username:
-          type: string
-        bio:
           type: string
           
     PostBody:
