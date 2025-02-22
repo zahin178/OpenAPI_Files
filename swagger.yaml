@@ -487,8 +487,6 @@ components:
           type: string
         email:
           type: string
-        bio:
-          type: string
         image_url:
           type: string
     
