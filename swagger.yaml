@@ -523,8 +523,9 @@ components:
           type: string
         tags:
           type: string
-        image_url:
+        image:
           type: string
+          format: binary
       required:
             - title
             - content
