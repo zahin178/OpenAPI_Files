@@ -551,21 +551,21 @@ components:
       type: object
       properties:
         postid:
-          type: integer
-          format: int64
+          type: string
         title:
           type: string
         content:
           type: string
         tags:
-          type: string
+          type: array
+          items:
+            type: string
         image_url:
           type: string
-        user:
+        username:
           type: string
         userid:
-          type: integer
-          format: int64
+          type: string
         likes:
           type: integer
           format: int64
