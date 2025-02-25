@@ -522,7 +522,9 @@ components:
         content:
           type: string
         tags:
-          type: string
+          type: array
+          items:
+            type: string
         image:
           type: string
           format: binary
