@@ -582,11 +582,9 @@ components:
       type: object
       properties:
         commentId:
-          type: integer
-          format: int64
+          type: string
         postId:
-          type: integer
-          format: int64
+          type: string
         comment:
           type: string
           
@@ -594,8 +592,7 @@ components:
       type: object
       properties:
         postId:
-          type: integer
-          format: int64
+          type: string
         likes:
           type: integer
           format: int64
