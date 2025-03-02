@@ -601,8 +601,7 @@ components:
       type: object
       properties:
         userid:
-          type: integer
-          format: int64
+          type: string
         username:
           type: string
 
